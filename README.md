@@ -36,8 +36,6 @@ Version 1.1 keeps the same main idea but fixes the problems found in version 1.0
 7. For stackable rewards, choose the exact quantity. Non-stackable equipment always gives one item.
 8. Check the displayed chance and press **Upgrade**.
 
-![Stackable reward quantity](docs/images/upgrader-quantity.png)
-
 ![Target catalogue](docs/images/upgrader-catalog.png)
 
 ## Crafting recipe
