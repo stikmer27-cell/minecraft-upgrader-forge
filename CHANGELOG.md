@@ -12,3 +12,4 @@
 - Added original interface sounds, smooth wheel motion and lightweight victory fireworks.
 - Blocked technical, creative-only and unobtainable rewards.
 - Improved performance by paging the catalogue and caching item descriptions, values and configuration.
+- Fixed smithing upgrade values. Netherite and modded smithing results now include the base item, template and added material.

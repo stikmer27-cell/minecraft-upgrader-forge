@@ -27,6 +27,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -161,6 +162,11 @@ public final class ValuationEngine {
     private List<RecipeEdge> recipeEdges(Level level) {
         RegistryAccess access = level.registryAccess();
         List<RecipeEdge> edges = new ArrayList<>();
+        List<ItemStack> registeredStacks = new ArrayList<>();
+        for (Item item : ForgeRegistries.ITEMS) {
+            try { registeredStacks.add(item.getDefaultInstance()); }
+            catch (RuntimeException | LinkageError ignored) {}
+        }
         for (Recipe<?> recipe : level.getRecipeManager().getRecipes()) {
             try {
                 if (recipe.isSpecial()) continue;
@@ -168,12 +174,19 @@ public final class ValuationEngine {
                 if (result.isEmpty() || result.getCount() <= 0 || isBlacklisted(result.getItem())) continue;
                 List<List<Item>> groups = new ArrayList<>();
                 boolean valid = true;
-                for (Ingredient ingredient : recipe.getIngredients()) {
-                    if (ingredient.isEmpty()) continue;
-                    List<Item> alternatives = new ArrayList<>();
-                    for (ItemStack option : ingredient.getItems()) if (!option.isEmpty() && !isBlacklisted(option.getItem())) alternatives.add(option.getItem());
-                    if (alternatives.isEmpty()) { valid = false; break; }
-                    groups.add(alternatives);
+                if (recipe instanceof SmithingRecipe smithing && recipe.getIngredients().isEmpty()) {
+                    groups.add(smithingAlternatives(registeredStacks, smithing, 0));
+                    groups.add(smithingAlternatives(registeredStacks, smithing, 1));
+                    groups.add(smithingAlternatives(registeredStacks, smithing, 2));
+                    valid = groups.stream().noneMatch(List::isEmpty);
+                } else {
+                    for (Ingredient ingredient : recipe.getIngredients()) {
+                        if (ingredient.isEmpty()) continue;
+                        List<Item> alternatives = new ArrayList<>();
+                        for (ItemStack option : ingredient.getItems()) if (!option.isEmpty() && !isBlacklisted(option.getItem())) alternatives.add(option.getItem());
+                        if (alternatives.isEmpty()) { valid = false; break; }
+                        groups.add(alternatives);
+                    }
                 }
                 if (valid && !groups.isEmpty()) edges.add(new RecipeEdge(result.getItem(), result.getCount(), groups));
             } catch (RuntimeException | LinkageError ignored) {
@@ -181,6 +194,19 @@ public final class ValuationEngine {
             }
         }
         return edges;
+    }
+
+    private List<Item> smithingAlternatives(List<ItemStack> stacks, SmithingRecipe recipe, int slot) {
+        List<Item> alternatives = new ArrayList<>();
+        for (ItemStack stack : stacks) {
+            try {
+                boolean matches = slot == 0 ? recipe.isTemplateIngredient(stack)
+                    : slot == 1 ? recipe.isBaseIngredient(stack)
+                    : recipe.isAdditionIngredient(stack);
+                if (matches && !stack.isEmpty() && !isBlacklisted(stack.getItem())) alternatives.add(stack.getItem());
+            } catch (RuntimeException | LinkageError ignored) {}
+        }
+        return alternatives;
     }
 
     private static double genericFloor(ItemStack stack) {
