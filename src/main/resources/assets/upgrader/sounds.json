@@ -1,0 +1,26 @@
+{
+  "wheel_start": {
+    "sounds": ["upgrader:wheel_start"]
+  },
+  "wheel_tick": {
+    "sounds": ["upgrader:wheel_tick"]
+  },
+  "upgrade_success": {
+    "sounds": ["upgrader:upgrade_success"]
+  },
+  "upgrade_failure": {
+    "sounds": ["upgrader:upgrade_failure"]
+  },
+  "ui_click": {
+    "sounds": ["upgrader:ui_click"]
+  },
+  "key_tap": {
+    "sounds": ["upgrader:key_tap"]
+  },
+  "item_select": {
+    "sounds": ["upgrader:item_select"]
+  },
+  "bet_confirm": {
+    "sounds": ["upgrader:bet_confirm"]
+  }
+}
